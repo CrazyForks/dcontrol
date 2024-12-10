@@ -41,8 +41,8 @@
             color: #666;  border-radius: 50%;  font-style: normal;  border: 1px solid #999;  }
         .control .input { width: 0px; flex: 1; }
         .douyin { background: #fff; }
-        .douyin .keyboard i { display: inline-block; width: 80px; line-height: 80px; margin: 6px; font-size: 22px; color: #578aef;  
-            border: 1px solid; border-image: linear-gradient(to right, #8f41e9, #fff, #578aef) 1; }
+        .douyin .keyboard i { display: inline-block; width: 80px; line-height: 80px; margin: 4px; font-size: 21px; color: #578aef;  white-space: nowrap;
+            border: 1px solid; border-image: linear-gradient(to right, #8f41e9, #ccc, #578aef) 1; }
         .douyin .keyboard .sm i { width: 50px; line-height: 50px; font-size: 18px; }
         .douyin .keyboard > div { text-align: center; margin-top: 6px; }
         .dialog-close { position: absolute; top: 0; right: 0; color: #333; padding: 6px 8px; }
@@ -127,10 +127,11 @@
     </div>
     <div class="dialog douyin" v-show="showDY">
         <div class="keyboard">
+            <div class="sm"><i k="VOLUME_DOWN">音量-</i><i k="VOLUME_UP">音量+</i><i k="VOLUME_MUTE">静音</i></div>
             <div><i k="UP">↑</i></div>
             <div><i k="LEFT">←</i><i k="DOWN">↓</i><i k="RIGHT">→</i></div>
-            <div class="sm"><i k="Z">点赞</i><i k="C">收藏</i><i k="G">关注</i><i k="X">评论</i></div>
-            <div class="sm"><i k="K">连播</i><i k="H">全屏</i><i k="F">主页</i><i k="B">弹幕</i><i k="J">清屏</i></div>
+            <div class="sm"><i k="Z">点赞</i><i k="C">收藏</i><i k="G">关注</i><i k="X">评论</i><i k="B">弹幕</i></div>
+            <div class="sm"><i k="K">连播</i><i k="F">主页</i><i k="J">清屏</i><i k="LBUTTON">点击</i><i k="H">全屏</i></div>
             <div class="flex-sb"><i k="UP">↑</i><i k="LEFT">←</i><i k="RIGHT">→</i><i k="UP">↑</i></div>
             <div class="flex-sb"><i k="DOWN">↓</i><i k="LEFT">←</i><i k="RIGHT">→</i><i k="DOWN">↓</i></div>
             <div><i k="SPACE" style="width: 80vw;">暂停</i></div>
