@@ -8,6 +8,7 @@
     <link rel="icon" href="./favicon.ico">
     <style>
         * { user-select: none; }
+        i { font-style: normal; }
         body{ margin: 0; width: 100%;}
         button{ font-size: 1rem; padding: 0.4rem; background: #00ABF5; color: #ffffff; display: inline-block; margin: 0.2em 0.2em; border: none; white-space: pre;}
         button svg{ width: 1.3em; height: 1.3em; vertical-align: middle;}
@@ -39,6 +40,13 @@
         .control i { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: #fff; margin-left: 4px;
             color: #666;  border-radius: 50%;  font-style: normal;  border: 1px solid #999;  }
         .control .input { width: 0px; flex: 1; }
+        .douyin { background: #fff; }
+        .douyin .keyboard i { display: inline-block; width: 80px; line-height: 80px; margin: 6px; font-size: 22px; color: #578aef;  
+            border: 1px solid; border-image: linear-gradient(to right, #8f41e9, #fff, #578aef) 1; }
+        .douyin .keyboard .sm i { width: 50px; line-height: 50px; font-size: 18px; }
+        .douyin .keyboard > div { text-align: center; margin-top: 6px; }
+        .dialog-close { position: absolute; top: 0; right: 0; color: #333; padding: 6px 8px; }
+        .flex-sb { display: flex; justify-content: space-between; }
         @media screen and (min-width: 1200px) {
             #keyboard div { font-size: 44px; }
             #keyboard div i, #keyboard div span { line-height: 44px; }
@@ -53,6 +61,7 @@
     <div style="padding: .3em;text-align:center;position:relative;box-shadow: 0 5px 10px -10px grey;">
         <button v-for="item in appList"  @click="open(item.path)">{{ item.name }}</button>
         <button onclick="location.reload()">刷新</button>
+        <button @click="showDouyin">抖音</button>
         <button @click="showScreen">远程</button>
     </div>
     <div style="padding: .3em;text-align:center;position:relative;box-shadow: 0 5px 10px -10px grey;">
@@ -83,7 +92,7 @@
         <button onclick="toggle('#keyboard')">键盘</button><button @click="sendkey('MBUTTON')">中键</button><button @click="sendkey('RBUTTON')">右键</button>
     </div>
     <div id="touch">单击左键，长按右键，双指滚动</div>
-    <div id="keyboard">
+    <div id="keyboard" class="keyboard">
         <div class="f2">
             <i k="CTRL,A">全选</i><i k="CTRL,C">复制</i><i k="CTRL,V">粘贴</i><i k="CTRL,X">剪切</i><i k="CTRL,Z">撤销</i><i k="CTRL,S">保存</i>
             <i k="ALT,ENTER">全屏</i>
@@ -116,6 +125,18 @@
             <i @click="hideScreen">&times;</i>
         </div>
     </div>
+    <div class="dialog douyin" v-show="showDY">
+        <div class="keyboard">
+            <div><i k="UP">↑</i></div>
+            <div><i k="LEFT">←</i><i k="DOWN">↓</i><i k="RIGHT">→</i></div>
+            <div class="sm"><i k="Z">点赞</i><i k="C">收藏</i><i k="G">关注</i><i k="X">评论</i></div>
+            <div class="sm"><i k="K">连播</i><i k="H">全屏</i><i k="F">主页</i><i k="B">弹幕</i><i k="J">清屏</i></div>
+            <div class="flex-sb"><i k="UP">↑</i><i k="LEFT">←</i><i k="RIGHT">→</i><i k="UP">↑</i></div>
+            <div class="flex-sb"><i k="DOWN">↓</i><i k="LEFT">←</i><i k="RIGHT">→</i><i k="DOWN">↓</i></div>
+            <div><i k="SPACE" style="width: 80vw;">暂停</i></div>
+        </div>
+        <i class="dialog-close" @click="showDY = false" style="font-size: 30px; padding: 10px 16px;">&times;</i>
+    </div>
     
     <script>
         const { createApp } = PetiteVue
@@ -137,6 +158,7 @@
             showQr: false,
             showPs: false,
             inputShow: false,
+            showDY: false,
             sendInput(e) {
                 if (e.key.toLowerCase() == 'enter') {
                     this.sendtext(this.keystr1)
@@ -164,6 +186,9 @@
                 screenTimer = setInterval(() => {
                     window.sendData('screen,80', true)
                 }, 500)
+            },
+            showDouyin() {
+                this.showDY = true
             },
             hideScreen() {
                 clearInterval(screenTimer)
@@ -220,9 +245,10 @@
                 document.body.style.paddingBottom = '0';
             }
         };
-        Array.from(document.querySelectorAll('#keyboard i')).forEach(el => {
+        Array.from(document.querySelectorAll('.keyboard i')).forEach(el => {
             el.addEventListener('click', function () { 
                 let key = el.getAttribute('k') || el.innerText;
+                console.log('keyboard click key: ', key);
                 request(`/monitor/sendkey?key=${key}`);
             });
         });
