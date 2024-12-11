@@ -38,8 +38,8 @@ apps:
 - dcontrol.exe -p 666 可以指定端口
 ### 其他说明
 - 页面效果图见`appimg`目录
+- ![alt 页面控制图3](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app-douyin.jpg)
 - ![alt 页面控制图](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app.jpg)
 - ![alt 页面控制图1](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app1.jpg)
 - ![alt 页面控制图2](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app2.jpg)
 - ![alt 页面控制图3](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app3.jpg)
-- ![alt 页面控制图3](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app-douyin.jpg)
