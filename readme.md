@@ -19,6 +19,8 @@ go mod tidy
 - 支持配置自定义本地应用, 手机端一键打开
 - 支持简易查看远程桌面, 触控点击远程桌面, 文本输入发送
 - 支持控制网页版抖音常见快捷键, 方便刷抖音
+- 支持全键盘页, 支持自定义布局页, 最大6个
+- 支持切换多个服务器连接
 - 小功能: 屏幕底部滚动, 可以控制系统音量
 ```yml
 # congfig.yml
@@ -38,8 +40,9 @@ apps:
 - dcontrol.exe -p 666 可以指定端口
 ### 其他说明
 - 页面效果图见`appimg`目录
-- ![alt 页面控制图3](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app-douyin.jpg)
-- ![alt 页面控制图](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app.jpg)
-- ![alt 页面控制图1](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app1.jpg)
-- ![alt 页面控制图2](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app2.jpg)
-- ![alt 页面控制图3](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app3.jpg)
+- ![alt 页面控制图3](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app7.jpg)
+- ![alt 页面控制图](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app2.jpg)
+- ![alt 页面控制图1](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app3.jpg)
+- ![alt 页面控制图2](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app5.jpg)
+- ![alt 页面控制图3](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app6.jpg)
+- ![alt 页面控制图3](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app8.jpg)
