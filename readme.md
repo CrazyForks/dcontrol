@@ -40,9 +40,10 @@ apps:
 - dcontrol.exe -p 666 可以指定端口
 ### 其他说明
 - 页面效果图见`appimg`目录
-- ![alt 页面控制图3](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app7.jpg)
-- ![alt 页面控制图](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app2.jpg)
-- ![alt 页面控制图1](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app3.jpg)
-- ![alt 页面控制图2](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app5.jpg)
-- ![alt 页面控制图3](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app6.jpg)
-- ![alt 页面控制图3](https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app8.jpg)
+- <img src="https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app7.jpg" style="width: 340px;"/>
+- <img src="https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app2.jpg" style="width: 340px;"/>
+- <img src="https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app3.jpg" style="width: 340px;"/>
+- <img src="https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app5.jpg" style="width: 340px;"/>
+- <img src="https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app6.jpg" style="width: 340px;"/>
+- <img src="https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app8.jpg" style="width: 340px;"/>
+
