@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>播放器-遥控器</title>
+    <link rel="icon" href="./favicon.ico">
+    <style>
+        * { user-select: none; }
+        i { font-style: normal; }
+        body{ margin: 0; width: 100%;}
+        button{ font-size: 1rem; padding: 0.4rem; background: #00ABF5; color: #ffffff; display: inline-block; margin: 0.2em 0.2em; border: none; white-space: pre;}
+        button svg{ width: 1.3em; height: 1.3em; vertical-align: middle;}
+        input[type=range]{ height: 56px; -webkit-appearance: none; margin: 10px 0; width: 100%;}
+        input[type=range]:focus{ outline: none;}
+        input[type=range]::-webkit-slider-runnable-track{ width: 100%; height: 30px; cursor: pointer; animate: 0.2s; box-shadow: 0px 0px 0px #000000; background: #E8E8E8; border-radius: 0px; border: 0px solid #010101;}
+        input[type=range]::-webkit-slider-thumb{ box-shadow: 0px 0px 0px #000031; border: 0px solid #00001E; height: 50px; width: 50px; border-radius: 50px; background: #00ABF5; cursor: pointer; -webkit-appearance: none; margin-top: -10px;}
+        input[type=range]:focus::-webkit-slider-runnable-track{ background: #E8E8E8;}
+        .playitem{ font-size: 1.2em; padding: 1em; white-space: nowrap;}
+        .playitem.playing{ color: #ffffff; background: #00ABF5;}
+        input{ line-height: 32px; padding: 0 4px; box-sizing: border-box; user-select: auto; outline: none; }
+        input[round] { border-radius: 16px; padding: 0 8px; }
+        .input { position: relative; display: block ;}
+        .input input { display: block; border: none; width: 100%; }
+        .input i { position: absolute; right: 3px; top: 6px; width: 18px !important; height: 18px !important; display: flex; align-items: center; 
+            justify-content: center; background: #eee;   color: #666;  border-radius: 50%;  font-style: normal;  }
+        #touch{ border: 1px solid #666; width: 86%; margin: 10px auto; height: 50vh; line-height: 50vh; text-align: center; color: #ccc; display: none; user-select:none;}
+        #keyboard { position: fixed; display: none; bottom: 0; left:0; width: 100%; padding: 10px 0 20px; box-sizing: border-box; z-index: 999; background: #fafafa;box-shadow: 0px -1px 5px #ccc;}
+        #keyboard div{ display: flex; margin: 10px 0; justify-content: space-around; font-size: calc(100vw / 20);}
+        #keyboard div i, #keyboard div span{ min-width: calc(100vw / 37); user-select:none;font-style: normal; line-height: 44px; padding: 0 calc(100vw / 60); border: 1px solid #ddd; border-radius: 4px; white-space: pre; text-align: center;}
+        #keyboard div i:active{ background: #ddd;}
+        #keyboard div.f1 i{ padding: 0 3px; font-size: 0.8em;}
+        #keyboard div.f2 i{ padding: 0 3px; font-size: 0.7em;}
+        .dialog { position: fixed; width: 100vw; height: 100vh; left: 0; top: 0; z-index: 9999; background: rgba(0, 0, 0, 0.5); text-align: center; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .qrwrap { background: #fff; padding: 20px; border-radius: 10px; }
+        .qrcode-img { width: 320px; height: 320px; border: 1px solid #ccc; margin-bottom: 10px; }
+        .dialog .control { position: fixed; z-index: 9999999; bottom: 10px; left: 5px;  opacity: .8; display: flex; align-items: center; width: calc(100% - 15px); justify-content: flex-end; }
+        .dialog > em { position: absolute; left: 0; top: 0;width: 100%; height: 100%; z-index: -1; }
+        .control i { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: #fff; margin-left: 4px;
+            color: #666;  border-radius: 50%;  font-style: normal;  border: 1px solid #999;  }
+        .control .input { width: 0px; flex: 1; }
+        .douyin { background: #fff; }
+        .douyin .keyboard i { display: inline-block; width: 80px; line-height: 80px; margin: 4px; font-size: 21px; color: #578aef;  white-space: nowrap;
+            border: 1px solid; border-image: linear-gradient(to right, #8f41e9, #ccc, #578aef) 1; }
+        .douyin .keyboard .sm i { width: 50px; line-height: 50px; font-size: 18px; }
+        .douyin .keyboard > div { text-align: center; margin-top: 6px; }
+        .dialog-close { position: absolute; top: 0; right: 0; color: #333; padding: 6px 8px; }
+        .flex-sb { display: flex; justify-content: space-between; }
+        @media screen and (min-width: 1200px) {
+            #keyboard div { font-size: 44px; }
+            #keyboard div i, #keyboard div span { line-height: 44px; }
+        }
+    </style>
+    <script src="./lib/petite-vue.iife.js"></script>
+    <script src="./lib/qr-creator.min.js"></script>
+    <script src="./lib/pako.min.js"></script>
+</head>
+<body @vue:mounted="mounted" xstyle="height:100vh; display:flex; flex-direction:column;">
+    <div id="logs"></div>
+    <div style="padding: .3em;text-align:center;position:relative;box-shadow: 0 5px 10px -10px grey;">
+        <button v-for="item in appList"  @click="open(item.path)">{{ item.name }}</button>
+        <button onclick="location.reload()">刷新</button>
+        <button @click="showDouyin">抖音</button>
+        <button @click="showScreen">远程</button>
+    </div>
+    <div style="padding: .3em;text-align:center;position:relative;box-shadow: 0 5px 10px -10px grey;">
+        <button @click="sendkey('ALT,TAB')">TAB</button>
+        <button @click="sendkey('ESC')">ESC</button>
+        <button @click="sendkey('ALT,F4')">关闭</button>
+        <button @click="sendkey('ENTER')">回车</button>
+        <button @click="sendkey('WIN,D')">桌面</button>
+        <button @click="showQr = true" v-show="ip">二维码</button>
+    </div>
+    <div style="padding: .3em;text-align:center;position:relative;box-shadow: 0 5px 10px -10px grey;">
+        <button @click="sendkey('MEDIA_PREV_TRACK')">上曲</button>
+        <button @click="sendkey('MEDIA_PLAY_PAUSE')">暂停</button>
+        <button @click="sendkey('MEDIA_NEXT_TRACK')">下曲</button>
+        <button @click="sendkey('VOLUME_DOWN')">音量-</button>
+        <button @click="sendkey('VOLUME_UP')">音量+</button>
+        <button @click="sendkey('VOLUME_MUTE')">静音</button>
+    </div>
+    <div style="padding: .3em;text-align:center;position:relative;box-shadow: 0 5px 10px -10px grey;">
+        <input type="text" v-model="keystr">
+        <button  @click="sendtext(keystr)">发文</button>
+        <button  @click="open(keystr)">开Exe</button>
+        <button  @click="keystr = ''">清空</button>
+    </div>
+    <div id="mousecontrol" style="padding: .3em;text-align:center;position:relative;box-shadow: 0 5px 10px -10px grey;">
+        鼠标速度:<input style="width: 40px;font-size: 18px;" value="2" type="number" id="mouseWeight">
+        <button onclick="changeDig()"> - </button><button onclick="changeDig(true)"> + </button>
+        <button onclick="toggle('#keyboard')">键盘</button><button @click="sendkey('MBUTTON')">中键</button><button @click="sendkey('RBUTTON')">右键</button>
+    </div>
+    <div id="touch">单击左键，长按右键，双指滚动</div>
+    <div id="keyboard" class="keyboard">
+        <div class="f2">
+            <i k="CTRL,A">全选</i><i k="CTRL,C">复制</i><i k="CTRL,V">粘贴</i><i k="CTRL,X">剪切</i><i k="CTRL,Z">撤销</i><i k="CTRL,S">保存</i>
+            <i k="ALT,ENTER">全屏</i>
+        </div>
+        <div class="f2">
+            <i k="CTRL,SHIFT">输入法</i><i k="ALT,F4">关闭</i><i k="WIN,D">桌面</i><i k="MEDIA_PREV_TRACK">上曲</i><i k="MEDIA_NEXT_TRACK">下曲</i>
+            <i k="MEDIA_PLAY_PAUSE">播放</i><i k="VOLUME_DOWN">音量-</i><i k="VOLUME_UP">音量+</i><i k="VOLUME_MUTE">静音</i>
+        </div>
+        <div class="f1"><i>ESC</i><i>F1</i><i>F2</i><i>F3</i><i>F4</i><i>F5</i><i>F6</i><i>F7</i><i>F8</i><i>F9</i><i>F10</i><i>F11</i><i>F12</i></div>
+        <div><i k="OEM_3">`</i><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i><i>8</i><i>9</i><i>0</i><i>BACK</i></div>
+        <div><i>TAB</i><i>Q</i><i>W</i><i>E</i><i>R</i><i>T</i><i>Y</i><i>U</i><i>I</i><i>O</i><i>P</i></div>
+        <div><i k="CAPITAL">CAPS</i><i>A</i><i>S</i><i>D</i><i>F</i><i>G</i><i>H</i><i>J</i><i>K</i><i>L</i><i k="ENTER">回车</i></div>
+        <div><i k="SHIFT">SHFT</i><i>Z</i><i>X</i><i>C</i><i>V</i><i>B</i><i>N</i><i>M</i><i k="HOME">HM</i><i k="UP">↑</i><i k="END">ED</i></div>
+        <div>
+            <i k="OEM_COMMA">,</i><i k="OEM_PERIOD">.</i><i k="OEM_2">/ </i><i k="OEM_4"> { </i><i k="OEM_6"> } </i><i k="SEMICOLON"> ; </i>
+            <i k="OEM_7"> ' </i><i k="OEM_MINU"> - </i><i k="OEM_PLUS"> + </i><i k="LEFT">←</i><i k="DOWN">↓</i><i k="RIGHT">→</i>
+        </div>
+        <div><span onclick="toggle('#keyboard')">隐藏</span><i style="flex: 1; line-height: 46px; margin-left: 10px;">SPACE</i></div>
+    </div>
+    <div class="dialog" v-show="showQr" @click="showQr = false"><div class="qrwrap"><div id="qrcode-img"></div><div>{{ ip }}</div><div>打开手机浏览器或者微信扫一扫</div></div></div>
+    <div class="dialog" v-show="showPs">
+        <em></em>
+        <canvas id="screen-box" @click="canvasClick" v-longtap="handleLongTap"></canvas>
+        <div class="control">
+            <div class="input" v-show="inputShow" ><input type="text" v-model="keystr1" round @keyup="sendInput"><i @click="keystr1 = ''">&times;</i></div>
+            <i v-show="inputShow" @click="sendInput">↵</i>
+            <i v-show="inputShow" @click="sendkey('CTRL,Z')">↶</i>
+            <i v-show="inputShow" @click="sendkey('BACK')">⇦</i>
+            <i @click="inputShow = !inputShow">▩</i>
+            <i @click="hideScreen">&times;</i>
+        </div>
+    </div>
+    <div class="dialog douyin" v-show="showDY">
+        <div class="keyboard">
+            <div class="sm"><i k="VOLUME_DOWN">音量-</i><i k="VOLUME_UP">音量+</i><i k="VOLUME_MUTE">静音</i></div>
+            <div><i k="UP">↑</i></div>
+            <div><i k="LEFT">←</i><i k="DOWN">↓</i><i k="RIGHT">→</i></div>
+            <div class="sm"><i k="Z">点赞</i><i k="C">收藏</i><i k="G">关注</i><i k="X">评论</i><i k="B">弹幕</i></div>
+            <div class="sm"><i k="K">连播</i><i k="F">主页</i><i k="J">清屏</i><i k="LBUTTON">点击</i><i k="H">全屏</i></div>
+            <div class="flex-sb"><i k="UP">↑</i><i k="LEFT">←</i><i k="RIGHT">→</i><i k="UP">↑</i></div>
+            <div class="flex-sb"><i k="DOWN">↓</i><i k="LEFT">←</i><i k="RIGHT">→</i><i k="DOWN">↓</i></div>
+            <div><i k="SPACE" style="width: 80vw;">暂停</i></div>
+        </div>
+        <i class="dialog-close" @click="showDY = false" style="font-size: 30px; padding: 10px 16px;">&times;</i>
+    </div>
+    
+    <script>
+        const { createApp } = PetiteVue
+        let baseApi = '/control-api';
+        let screenTimer = null
+        window.deskWidth = 0
+        window.deskHeight = 0
+        createApp({
+            error: 'connecting ...',
+            pos: 0,
+            total: 0,
+            mouseWeight: 1.4,
+            isConnected: true,
+            status: '',
+            keystr: '',
+            keystr1: '',
+            appList: [],
+            ip: '',
+            showQr: false,
+            showPs: false,
+            inputShow: false,
+            showDY: false,
+            sendInput(e) {
+                if (e.key.toLowerCase() == 'enter') {
+                    this.sendtext(this.keystr1)
+                    this.keystr1 = ''
+                }
+                if (e.key.toLowerCase() == 'backspace' && !this.keystr1) {
+                    this.sendkey('BACK')
+                }
+            },
+            sendkey(val) {
+                request(`/monitor/sendkey?key=${val}`);
+            },
+            sendtext(val) {
+                request(`/monitor/sendtext?val=${val}`);
+            },
+            open(val) {
+                request(`/monitor/open?cmd1=${val}`);
+            },
+            toControl() {
+                location.href = baseUrl;
+            },
+            showScreen() {
+                this.showPs = true
+                clearInterval(screenTimer)
+                screenTimer = setInterval(() => {
+                    window.sendData('screen,80', true)
+                }, 500)
+            },
+            showDouyin() {
+                this.showDY = true
+            },
+            hideScreen() {
+                clearInterval(screenTimer)
+                screenTimer = null
+                this.showPs = false
+            },
+            toggle(el) {
+                toggle(el)
+            },
+            canvasClick(e) {
+                console.log(e);
+                const canvas = document.getElementById('screen-box');
+                const context = canvas.getContext('2d');
+                const rect = canvas.getBoundingClientRect();
+                const scale = canvas.style.width.replace('px', '') / window.deskWidth
+                const x = (event.clientX - rect.left) / scale;
+                const y = (event.clientY - rect.top) / scale;
+                console.log(x,y, event.clientY, rect.top);
+                request(`/monitor/sendclick?val=${x.toFixed(0)},${y.toFixed(0)}`);
+            },
+            handleLongTap(e) {
+                console.log('handleLongTap...');
+                this.sendkey('RBUTTON')
+            },
+            mounted() {
+                console.log('mounted...');
+                request('/monitor/getApps').then(res => {
+                    this.appList = res.data || []
+                })
+                request('/monitor/getIp').then(res => {
+                    if (res.data) {
+                        this.ip = res.data ? location.href.replace(location.hostname, res.data) : ''
+                        QrCreator.render({
+                            text: this.ip,
+                            radius: 0, // 0.0 to 0.5
+                            ecLevel: 'Q', // L, M, Q, H
+                            fill: '#000', // foreground color
+                            background: null, // color or null for transparent
+                            size: 320 // in pixels
+                        }, document.querySelector('#qrcode-img'));
+                    }
+                })
+            }
+        }).directive('longtap', longtapDc).mount();
+
+        function toggle(sel) {
+            let el = document.querySelector(sel);
+            if (!el) return;
+            el.style.display = el.style.display == 'block' ? 'none' : 'block';
+            if (sel == '#keyboard' && el.style.display == 'block') {
+                document.body.style.paddingBottom = el.offsetHeight + 'px';
+                window.scrollTo(0, document.getElementById('mousecontrol').offsetTop);
+            } else {
+                document.body.style.paddingBottom = '0';
+            }
+        };
+        Array.from(document.querySelectorAll('.keyboard i')).forEach(el => {
+            el.addEventListener('click', function () { 
+                let key = el.getAttribute('k') || el.innerText;
+                console.log('keyboard click key: ', key);
+                request(`/monitor/sendkey?key=${key}`);
+            });
+        });
+
+        /*** websocket 鼠标移动相关  ***/
+        window.isSocketOpen = false
+        const canvas = document.getElementById('screen-box');
+        const ctx = canvas.getContext('2d');
+        console.log('ctx backingStorePixelRatio ',ctx.backingStorePixelRatio);
+        let dpr = window.devicePixelRatio || 1
+        websocket = new WebSocket(`ws://${location.host}/ws`);
+        websocket.binaryType = 'arraybuffer';
+        websocket.onmessage = async function(evt) {
+            console.log('onmessage', evt.data, typeof evt.data);
+            if (evt.data && (evt.data.size || evt.data.byteLength)) {
+                const img = new Image();
+                // 传json和图片用下面3行
+                // const jsonData = JSON.parse(pako.ungzip(new Uint8Array(evt.data), { to: 'string' }));
+                // console.log('Received jsonData:', jsonData);
+                // img.src = 'data:image/jpeg;base64,' + jsonData.img;
+                // 只传图片用下面3行
+                const blob = new Blob([pako.ungzip(new Uint8Array(evt.data))], { type: 'image/jpeg' });
+                const url = URL.createObjectURL(blob)
+                img.src = url
+                img.onload = () => {
+                    window.deskWidth = img.width
+                    window.deskHeight = img.height
+                    let widthScale = window.innerWidth / img.width
+                    let heightScale = window.innerHeight / img.height
+                    if (widthScale <= heightScale) {
+                        canvas.width = Math.round(window.innerWidth * dpr);
+                        canvas.height =  canvas.width * img.height / img.width;
+                        canvas.style.width = window.innerWidth + 'px';
+                        canvas.style.height = (window.innerWidth * img.height / img.width) + 'px';
+                    } else {
+                        canvas.height =  Math.round(window.innerHeight * dpr);
+                        canvas.width = canvas.height * img.width / img.height;
+                        canvas.style.width = (window.innerHeight * img.width / img.height) + 'px';
+                        canvas.style.height = window.innerHeight + 'px';
+                    }
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    // ctx.scale(dpr, dpr)
+                    URL.revokeObjectURL(url);
+                };
+            }
+        }; 
+        websocket.onopen = function() {
+            console.log('socket open....');
+            isSocketOpen = true
+            document.getElementById('touch').style.display = 'block';
+        };
+        websocket.onclose = function() {
+            console.log('socket close....');
+            isSocketOpen = false
+            document.getElementById('touch').style.display = 'none';
+        };
+        let startTime = 0;
+        function sendData(data, force) {
+            if (!isSocketOpen) return;
+            const curr = new Date().getTime();
+            if (curr - startTime > 60 || force) {
+                console.log('socket send....', data);
+                websocket.send(data);
+                startTime = curr;
+            }
+        };
+        window.pos = {
+            doubleStartY: 0,
+            startX: 0,
+            startY: 0,
+            startTime: 0,
+            isTouchMove: false
+        };
+        document.getElementById('touch').addEventListener('touchstart', function(ev){
+            ev.preventDefault()
+            if (ev.touches.length > 1) {
+                pos.doubleStartY = ev.touches[0].clientY; // 获取第一个触点的起始位置
+            } else {
+                pos.startX = ev.changedTouches[0].pageX;
+                pos.startY = ev.changedTouches[0].pageY;
+            }
+            pos.startTime = new Date().getTime();
+            pos.isTouchMove = false;
+        });
+        document.getElementById('touch').addEventListener('touchmove', function(ev){
+            ev.preventDefault();
+            if (ev.touches.length > 1) {
+                const currY = ev.touches[0].clientY;
+                const deltaY = currY - pos.doubleStartY;
+                pos.doubleStartY = currY; // 更新起始位置
+                // logs('pos.doubleStartY' + pos.doubleStartY)
+                if (Math.abs(deltaY) > 10) { // 阈值，避免小的抖动
+                    moveScroll(deltaY > 0)
+                }
+            } else {
+                const currX = ev.changedTouches[0].pageX;
+                const currY = ev.changedTouches[0].pageY;
+                pos.isTouchMove = Math.abs(currX - pos.startX) > 10 || Math.abs(currY - pos.startY) > 10
+                pos.isTouchMove && move(currX, currY);
+            }
+        });
+        document.getElementById('touch').addEventListener('touchend', function(ev){
+            // logs('touchend' + pos.doubleStartY);
+            if (!pos.isTouchMove && pos.doubleStartY == 0) {
+                console.log(pos.isTouchMove, '点击事件');
+                if (new Date().getTime() - pos.startTime > 600) {
+                    return sendData('pos,longclick', true);
+                };
+                return sendData('pos,click', true);
+            }
+            sendData('pos,end', true);
+            setTimeout(() => pos.doubleStartY = 0, 50) // 停止后再移动, 延迟设置, 不然好像会触发这个touchend两次
+        });
+        function move(x = 0, y = 0) {
+            let mouseWeight = parseFloat(document.getElementById('mouseWeight').value || 2) / 1;
+            console.log('mouseWeight', Number(this.mouseWeight));
+            sendData('pos,start,' + (mouseWeight * x).toFixed(0) + ',' + (mouseWeight * y).toFixed(0));
+        };
+        function moveScroll(isDown) {
+            let mouseWeight = parseFloat(document.getElementById('mouseWeight').value || 2) / 1;
+            sendData('pos,scroll,' + (isDown ? -1 : 1) + ',' + mouseWeight);
+        }
+        function changeDig(isAdd) {
+            document.getElementById('mouseWeight').value = parseFloat(document.getElementById('mouseWeight').value || 2) + ( isAdd ? 1 : -1 );
+        };
+        
+        /* document.addEventListener('click', function (e) {
+            let keyDom = document.querySelector('#keyboard');
+            if (!keyDom.contains(e.target) && keyDom.style.display == 'block' && e.target != document.querySelector('#keycontrol')) {
+                keyDom.style.display = 'none';
+            }
+        }) */
+
+        // window.addEventListener('keydown', (ev) => {
+        //     logs('Key code:', ev.keyCode, ev.key);
+        //     setTimeout(() => {
+        //         if (ev.keyCode === 33) { // Page Up
+        //         logs('Volume Up Key Detected');
+        //         } else if (ev.keyCode === 34) { // Page Down
+        //             logs('Volume Down Key Detected');
+        //         }
+        //     }, 1000)
+        // });
+
+        function logs(...val) {
+            document.getElementById('logs').innerHTML = (val || []).join('  ')
+        }
+
+        function request(options, temp) {
+            let opts = temp
+            if (typeof options != 'string') {
+                opts = options
+            }
+            let { url, method = 'GET', params = {}, data = null } = opts || {};
+            if (typeof options == 'string') url = options
+
+            // 将查询参数转换为URL编码字符串
+            const queryString = Object.keys(params).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`).join('&');
+
+            // 构建完整的请求URL
+            let finalUrl = url + (url.includes('?') ? '&' : '?') + queryString;
+            finalUrl = finalUrl.includes('http') ? finalUrl : `${baseApi}${finalUrl}`
+
+            // 设置请求头部
+            const headers = {};
+            if (data) headers['Content-Type'] = 'application/json'
+
+            // 发起Fetch请求
+            return new Promise((resolve, reject) => {
+                fetch(finalUrl, { method, headers, body: data ? JSON.stringify(data) : null}).then(res => {
+                    if (!res.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return res.json();
+                }).then(r => resolve(r)).catch(e => reject(e));
+            });
+        }
+
+        function longtapDc({ el, get }) {
+            let val = get()
+            if (typeof val !== "function") return;
+
+            let pressTimer = null
+
+            let start = (e) => {
+                if (e instanceof MouseEvent && e.type === "click" && e.button !== 0) return;
+                if (pressTimer === null) pressTimer = setTimeout(() => val(e), 500);
+            }
+
+            let cancel = () => {
+                clearTimeout(pressTimer);
+                pressTimer = null;
+            }
+
+            el.addEventListener("mousedown", start);
+            el.addEventListener("touchstart", start);
+
+            el.addEventListener("click", cancel);
+            el.addEventListener("mouseup", cancel);
+            el.addEventListener("mouseout", cancel);
+            el.addEventListener("touchend", cancel);
+            el.addEventListener("touchcancel", cancel);
+        }
+
+        // function unGzip(blob) {
+        //     return new Promise(reso => {
+        //         const reader = new FileReader()
+        //         reader.onload = function(e) {
+        //             try {
+        //                 reso(pako.ungzip(new Uint8Array(e.target.result)))
+        //             } catch (e) {
+        //                 console.log('unGzip error', e);
+        //                 reso(null)
+        //             }
+        //         }
+        //         reader.onerror = () => reso(null)
+        //         reader.readAsArrayBuffer(blob)
+        //     })
+        // }
+
+        var  timerId;
+        function throttle(func, delay) {
+            if (timerId) return;
+
+            timerId = setTimeout(function () {
+                func();
+                timerId  =  undefined;
+            }, delay);
+        };
+    </script>
+</body>
+</html>
