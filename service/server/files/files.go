@@ -50,6 +50,8 @@ func HandleApi(w http.ResponseWriter, r *http.Request) {
 		downloadHandler(w, r)
 	case strings.Contains(path, "/list"):
 		listHandler(w, r)
+	case strings.Contains(path, "/del"):
+		deleteFile(w, r)
 	default:
 		http.NotFound(w, r)
 	}
@@ -207,4 +209,27 @@ func listHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	base.R(w).Ok(filesInfo)
+}
+
+func deleteFile(w http.ResponseWriter, r *http.Request) {
+	// 获取文件名参数
+	filename := r.URL.Query().Get("name")
+	if filename == "" {
+		base.R(w).FailMsg("文件名不能为空")
+		return
+	}
+	fmt.Println("下载文件, " + filename)
+
+	// 构建完整的文件路径
+	filePath := filepath.Join(uploadDir, filename)
+
+	// Try to delete the file
+	err := os.Remove(filePath)
+	if err != nil {
+		// If an error occurs, return it to the client
+		base.R(w).FailMsg("删除文件失败")
+		return
+	}
+	base.R(w).Ok(filename)
+	
 }
