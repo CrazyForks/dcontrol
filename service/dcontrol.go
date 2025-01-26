@@ -2,10 +2,11 @@ package main
 
 import (
 	"dcontrol/server/base"
+	"dcontrol/server/files"
+	"dcontrol/server/keys"
 	"dcontrol/server/monitor"
 	"dcontrol/server/setting"
 	"dcontrol/server/utils"
-	"dcontrol/server/keys"
 	"dcontrol/server/ws"
 	"flag"
 	"fmt"
@@ -27,6 +28,7 @@ func main() {
 	flag.Parse()
 	//1.加载配置
 	setting.Init(*filePath)
+	files.InitDir()
 	base.RunPort = setting.Conf.Port
 	if *port != 0 {
 		base.RunPort = *port
@@ -34,6 +36,7 @@ func main() {
 	addr := fmt.Sprintf(":%d", base.RunPort)
 
 	http.HandleFunc("/control-api/monitor/", monitor.HandleApi)
+	http.HandleFunc("/control-api/file/", files.HandleApi)
 	http.HandleFunc("/ws", ws.ServeWs)
 
 	// 注册静态资源

@@ -104,8 +104,12 @@
       </div>
       <mouse-panel></mouse-panel>
     </div>
-    <!-- 自定义布局页 -->
+    <!-- 文件 -->
     <div v-if="tabIndex == 4">
+      <file-list></file-list>
+    </div>
+    <!-- 自定义布局页 -->
+    <div v-if="tabIndex == 5">
       <custom-btn></custom-btn>
     </div>
     <!-- 下弹出键盘 -->
@@ -123,11 +127,10 @@
   <script src="./js/index.js"></script>
   <script>
     // 异步加载组件列表, /js/components/xxx.js
-    window.SYNC_COMPONENTS = ['DouYin', 'Keyboard', 'MousePanel', 'TabBar', 'ServerPanel', 'CustomBtn']
+    window.SYNC_COMPONENTS = ['DouYin', 'Keyboard', 'MousePanel', 'TabBar', 'ServerPanel', 'FileList', 'CustomBtn']
     window.$eventBus = new EventBus() // 全局事件总线
     window.deskWidth = 0
     window.deskHeight = 0
-    window.baseHostPort = getStorage('baseHostPort') || location.host
 
     // 其他工具类:::
     function toggle(sel) {

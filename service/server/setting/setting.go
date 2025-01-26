@@ -15,6 +15,7 @@ type AppConfig struct {
 	Name string `mapstructure:"name"`
 	Mode string `mapstructure:"mode"`
 	Port int    `mapstructure:"port"`
+	Dir string    `mapstructure:"dir"` // 文件目录
 	Open bool   `mapstructure:"open"` // 是否启动打开应用
 	Volume bool   `mapstructure:"volume"` // 是否底部滚动监听控制音量
 
@@ -63,6 +64,7 @@ func Init(filePath string) {
 port: 666
 open: false
 volume: true
+dir: files
 apps:
   - name: 微信
     path: E:\Program Files (x86)\Tencent\WeChat\WeChat.exe
