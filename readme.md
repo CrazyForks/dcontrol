@@ -21,12 +21,14 @@ go mod tidy
 - 支持控制网页版抖音常见快捷键, 方便刷抖音
 - 支持全键盘页, 支持自定义布局页, 最大6个
 - 支持切换多个服务器连接
+- 支持文件上传下载(参数dir指定目录)
 - 小功能: 屏幕底部滚动, 可以控制系统音量
 ```yml
 # congfig.yml
 port: 666
 open: true
 volume: true
+dir: files
 apps:
   - name: 微信
     path: E:\Program Files (x86)\Tencent\WeChat\WeChat.exe
@@ -46,4 +48,5 @@ apps:
 - <img src="https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app5.jpg" style="width: 340px;"/>
 - <img src="https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app6.jpg" style="width: 340px;"/>
 - <img src="https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app8.jpg" style="width: 340px;"/>
+- <img src="https://gcore.jsdelivr.net/gh/dhjz/dcontrol@master/appimg/app9.jpg" style="width: 340px;"/>
 
