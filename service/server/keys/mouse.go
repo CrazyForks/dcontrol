@@ -2,11 +2,11 @@ package keys
 
 import (
 	"dcontrol/server/setting"
-	
+
 	"fmt"
+	"syscall"
 	"time"
 	"unsafe"
-	"syscall"
 )
 
 var (
@@ -28,8 +28,9 @@ var (
 const (
 	WH_MOUSE_LL = 14
 	WM_MOUSEWHEEL = 0x020A
-	SCREEN_BOTTOM_BUFFER = 5 // 距离屏幕底部5像素监听滚动
+	SCREEN_BOTTOM_BUFFER = 7 // 距离屏幕底部5像素监听滚动
 	SM_CYSCREEN = 1
+	SM_CXSCREEN = 0
 )
 
 // 定义鼠标事件常量
@@ -115,17 +116,34 @@ func ScrollMouse(scroll int, weight int) {
 func mouseHookCallback(nCode int32, wParam, lParam uintptr) uintptr {
 	if nCode >= 0 && wParam == WM_MOUSEWHEEL && setting.Conf.Volume {
 		mouseHookStruct := (*MSLLHOOKSTRUCT)(unsafe.Pointer(lParam))
-		ret, _, _ := procGetSystemMetrics.Call(SM_CYSCREEN)
-		screenBottom := int32(ret)
+		screenWidth, _, _ := procGetSystemMetrics.Call(SM_CXSCREEN) // 屏幕宽度
+		screenHeight, _, _ := procGetSystemMetrics.Call(SM_CYSCREEN)
+		width := int32(screenWidth)
+		height := int32(screenHeight)
+		mouseX := mouseHookStruct.Pt.X
 		mouseY := mouseHookStruct.Pt.Y
-		if mouseY >= screenBottom - SCREEN_BOTTOM_BUFFER {
+		if mouseY >= height - SCREEN_BOTTOM_BUFFER {
 			var dy = int32(mouseHookStruct.MouseData>>16)
-			fmt.Printf("Mouse wheel delta: %d, Mouse position: %d (within %d pixels of screen bottom)\n",
-				dy, mouseY, SCREEN_BOTTOM_BUFFER)
-			if dy > 1000 { // down
-				RunKeys(KeyMap["VOLUME_DOWN"])
-			} else {
-				RunKeys(KeyMap["VOLUME_UP"])
+			fmt.Printf("Mouse wheel delta: %d, Mouse position: %d, %d (within %d pixels of screen bottom)\n",
+				dy, mouseX, mouseY, SCREEN_BOTTOM_BUFFER)
+				if mouseX < width/4 { // 屏幕左25%
+					if dy > 1000 { // 向下滚动，执行下键
+							RunKeys(KeyMap["DOWN"])
+					} else { // 向上滚动，执行上键
+							RunKeys(KeyMap["UP"])
+					}
+			} else if mouseX > 3*width/4 { // 屏幕右25%
+					if dy > 1000 { // 向下滚动，执行右键
+							RunKeys(KeyMap["RIGHT"])
+					} else { // 向上滚动，执行左键
+							RunKeys(KeyMap["LEFT"])
+					}
+			} else { // 屏幕中间50%
+					if dy > 1000 { // 向下滚动，执行音量减小
+							RunKeys(KeyMap["VOLUME_DOWN"])
+					} else { // 向上滚动，执行音量增大
+							RunKeys(KeyMap["VOLUME_UP"])
+					}
 			}
 		}
 	}

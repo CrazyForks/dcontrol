@@ -10,6 +10,7 @@
 
 go env -w GOOS=windows
 go build -ldflags "-s -w -H=windowsgui" -o ./dist/
+del .\dist\dcontrol.min.exe
 upx ./dist/dcontrol.exe -o ./dist/dcontrol.min.exe
 
 :: go build -o ddns.exe
