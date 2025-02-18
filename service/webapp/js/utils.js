@@ -123,13 +123,13 @@ window.longtapDc = {
 async function syncAllComponents(app) {
   app = app || window.appIns
   const components = window.SYNC_COMPONENTS || []
-  for (let i = 0; i < components.length; i++) {
-    const name = components[i];
-    winName = `${name}Comp`
-    await loadScript(`./js/components/${name}.js`, winName)
+
+  await Promise.all(components.map(async (name) => {
+    const winName = `${name}Comp`;
+    await loadScript(`./js/components/${name}.js`, winName);
     console.log('syncAllComponents... ', winName);
-    window[winName] && app.component(name, window[winName])
-  }
+    window[winName] && app.component(name, window[winName]);
+  }));
 }
 
 class EventBus {
